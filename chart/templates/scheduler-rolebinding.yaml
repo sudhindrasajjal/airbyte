@@ -1,0 +1,20 @@
+{{- if and .Values.scheduler.enabled .Values.rbac.create }}
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: RoleBinding
+metadata:
+  labels:
+    {{- include "airbyte.scheduler.labels" . | nindent 4 }}
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.scheduler.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.scheduler.name }}
+subjects:
+  - kind: ServiceAccount
+    {{- if .Values.scheduler.useExistingServiceAccount }}
+    name: {{ .Values.scheduler.useExistingServiceAccount }}
+    {{- else }}
+    name: {{ template "airbyte.serviceAccountName.scheduler" . }}
+    {{- end }}
+{{- end }}

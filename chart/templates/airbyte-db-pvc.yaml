@@ -1,0 +1,26 @@
+{{- if .Values.db.create}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+{{- if .Values.db.persistentVolume.annotations }}
+  annotations:
+{{ toYaml .Values.db.persistentVolume.annotations | indent 4 }}
+  {{- end }}
+  name: {{ template "airbyte.fullname" . }}-volume-db
+  namespace: {{ template "airbyte.namespace" . }}
+  labels:
+    {{- include "airbyte.persistentVolume.db.labels" . | nindent 4 }}
+spec:
+  accessModes:
+{{ toYaml .Values.db.persistentVolume.accessModes | indent 4 }}
+{{- if .Values.db.persistentVolume.storageClass }}
+{{- if (eq "-" .Values.db.persistentVolume.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.db.persistentVolume.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.db.persistentVolume.size }}
+{{- end }}

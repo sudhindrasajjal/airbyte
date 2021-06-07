@@ -1,0 +1,57 @@
+{{- if .Values.db.create }}
+apiVersion: {{ template "airbyte.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+{{- if .Values.db.deploymentAnnotations }}
+  annotations:
+    {{ toYaml .Values.db.deploymentAnnotations | nindent 4 }}
+{{- end }}
+  labels:
+    {{- include "airbyte.db.labels" . | nindent 4 }}
+    component: db
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.db.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "airbyte.db.matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- if .Values.db.podAnnotations }}
+      annotations:
+        {{ toYaml .Values.db.podAnnotations | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "airbyte.db.labels" . | nindent 8 }}
+        {{- if .Values.db.podLabels}}
+        {{ toYaml .Values.db.podLabels | nindent 8 }}
+        {{- end}}
+    spec:
+      containers:
+        - name: {{ template "airbyte.fullname" . }}-{{ .Values.db.name }}
+          image: "{{ .Values.db.image.repository }}:{{ .Values.db.image.tag }}"
+          imagePullPolicy: "{{ .Values.db.image.pullPolicy }}"
+          env:
+            - name: POSTGRES_DB
+              value: db-airbyte
+            - name: POSTGRES_PASSWORD
+              value: docker
+            - name: POSTGRES_USER
+              value: docker
+            {{- range $key, $value := .Values.db.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $value }}
+            {{- end }}
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: {{ template "airbyte.fullname" . }}-volume-{{ .Values.db.name }}
+              mountPath: /var/lib/postgresql
+          resources:
+            {{ toYaml .Values.db.resources | indent 12 }} 
+      volumes:
+        - name: {{ template "airbyte.fullname" . }}-volume-{{ .Values.db.name }}
+          persistentVolumeClaim:
+            claimName: {{ template "airbyte.fullname" . }}-volume-{{ .Values.db.name }}
+{{- end }}

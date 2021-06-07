@@ -1,0 +1,76 @@
+{{- if .Values.scheduler.enabled }}
+apiVersion: {{ template "airbyte.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+{{- if .Values.scheduler.deploymentAnnotations }}
+  annotations:
+    {{ toYaml .Values.scheduler.deploymentAnnotations | nindent 4 }}
+{{- end }}
+  labels:
+    {{- include "airbyte.scheduler.labels" . | nindent 4 }}
+    component: scheduler
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.scheduler.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+spec:
+  replicas: {{ .Values.scheduler.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "airbyte.scheduler.matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- if .Values.scheduler.podAnnotations }}
+      annotations:
+        {{ toYaml .Values.scheduler.podAnnotations | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "airbyte.scheduler.labels" . | nindent 8 }}
+        {{- if .Values.scheduler.podLabels}}
+        {{ toYaml .Values.scheduler.podLabels | nindent 8 }}
+        {{- end}}
+    spec:
+      {{- if .Values.scheduler.useExistingServiceAccount }}
+      serviceAccountName: {{ .Values.scheduler.useExistingServiceAccount }}
+      {{- else }}
+      serviceAccountName: {{ template "airbyte.serviceAccountName.scheduler" . }}
+      {{- end }}
+      automountServiceAccountToken: true
+      initContainers:
+        - name: {{ template "airbyte.fullname" . }}-{{ .Values.scheduler.name }}-seed
+          image: "{{ .Values.scheduler.initContainer.image.repository }}:{{ .Values.scheduler.initContainer.image.tag }}"
+          imagePullPolicy: "{{ .Values.scheduler.initContainer.image.pullPolicy }}"
+          args:
+            - "bin/sh"
+            - "-c"
+            - "mkdir -p /configs/config && yes n | cp -r -i /app/seed/config /configs"
+          volumeMounts:
+            - name: {{ template "airbyte.fullname" . }}-volume-configs
+              mountPath: /configs
+            - name: {{ template "airbyte.fullname" . }}-volume-workspace
+              mountPath: /workspace
+      containers:
+        - name: {{ template "airbyte.fullname" . }}-{{ .Values.scheduler.name }}
+          image: "{{ .Values.scheduler.image.repository }}:{{ .Values.scheduler.image.tag }}"
+          imagePullPolicy: "{{ .Values.scheduler.image.pullPolicy }}"
+          ports:
+            - containerPort: 8001
+          volumeMounts:
+            - name: {{ template "airbyte.fullname" . }}-volume-configs
+              mountPath: /configs
+            - name: {{ template "airbyte.fullname" . }}-volume-workspace
+              mountPath: /workspace
+          env:
+            {{- range $key, $value := .Values.scheduler.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $value }}
+            {{- end }}
+            # TODO - Other Env variables
+          resources:
+            {{ toYaml .Values.scheduler.resources | indent 12 }}
+      volumes:
+        - name: {{ template "airbyte.fullname" . }}-volume-workspace
+          persistentVolumeClaim:
+            claimName: {{ template "airbyte.fullname" . }}-volume-workspace
+        - name: {{ template "airbyte.fullname" . }}-volume-configs
+          persistentVolumeClaim:
+            claimName: {{ template "airbyte.fullname" . }}-volume-configs
+{{- end }}

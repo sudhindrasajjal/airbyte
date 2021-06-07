@@ -5,8 +5,10 @@ metadata:
   labels:
     airbyte: volume-workspace
 spec:
+  storageClassName: block-storage
+  volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 500Mi
+      storage: 2Gi

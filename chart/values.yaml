@@ -1,0 +1,391 @@
+rbac:
+  create: true
+
+namespaceOverride: ""
+
+db:
+  ## If false, airbyte DB will not be created.
+  ## If false, You will have to provide existing Database credentials. See below.
+  ##
+  create: true
+
+  ## Fetch database credentials from a Kubernetes secret
+  ## Secret needs to be available in the same namespace as Airbyte
+  ## 
+  useExistingDatabase:
+    ## Postgresql Username. Default is docker
+    ##
+    postgresqlUsername: docker
+
+    ## Postgresql database name. Default is airbyte
+    ##
+    postgresqlDatabase: airbyte
+
+    ## Postgresql Host address.
+    ##
+    postgresqlHost: ""
+
+    ## Postgresql Port. Default is 5432
+    ##
+    postgresqlPort: 5432
+
+    ## Postgresql Password. Providing plain-text passwords is not advisable.
+    ## Hence, the password is fetched from a Kubernetes secret.
+    ## existingSecretName is the name of the K8s secret, and keyName is the corresponding key in the secret which contains the Postgresql password.
+    ## Read more: https://kubernetes.io/docs/concepts/configuration/secret/
+    ##
+    secretKey:
+      existingSecretName: ""
+      keyName: ""
+
+  ## Airbyte DB container name
+  ##
+  name: db
+
+  ## Airbyte DB container image
+  ##
+  image:
+    repository: airbyte/db
+    tag: 0.22.3-alpha
+    pullPolicy: IfNotPresent
+
+  ## Airbyte DB Deployment annotations
+  ##
+  deploymentAnnotations: {}
+
+  ## Additional Airbyte DB container environment variable
+  ##
+  extraEnv: {}
+
+  persistentVolume:
+    ## airbyte DB Persistent Volume Claim annotations
+    ##
+    annotations: {}
+
+    ## airbyte DB Persistent Volume access modes
+    ## Must match those of existing PV or dynamic provisioner
+    ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    ##
+    accessModes:
+      - ReadWriteOnce
+
+    ## Airbyte DB Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-" 
+
+    ## airbyte DB Persistent Volume size
+    ##
+    size: 500Mi
+
+  ## Airbyte DB Pod annotations
+  ##
+  podAnnotations: {}
+
+  ## Labels to be added to Airbyte DB pods
+  ##
+  podLabels: {}
+
+  ## Airbyte DB resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 32Mi
+
+  service:
+    ## Airbyte DB service annotations
+    ##
+    annotations: {}
+
+scheduler:
+
+  ## If false, airbyte scheduler will not be created.
+  ##
+  enabled: true
+
+  ## Airbyte Scheduler container name
+  ##
+  name: scheduler
+
+  ## Airbyte Scheduler replicas count
+  ##
+  replicaCount: 1
+
+  ## Airbyte Scheduler container image
+  ##
+  image:
+    repository: airbyte/scheduler
+    tag: 0.22.3-alpha
+    pullPolicy: IfNotPresent
+
+  ## Airbyte Scheduler initContainer Image
+  initContainer:
+    image:
+      repository: airbyte/seed
+      tag: 0.22.3-alpha
+      pullPolicy: IfNotPresent
+
+  ## Airbyte Scheduler Deployment annotations
+  ##
+  deploymentAnnotations: {}
+
+  ## Additional Airbyte Scheduler container environment variable
+  ##
+  extraEnv: {}
+
+  ## Airbyte Scheduler Pod annotations
+  ##
+  podAnnotations: {}
+
+  ## Airbyte Scheduler Pod labels
+  ##
+  podLabels: {}
+
+  ## Airbyte Scheduler resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 32Mi
+
+  ## Create serviceAccount for the scheduler.
+  ## If false, provide the serviceAccountName below to use
+  ##
+  serviceAccount:
+    create: true
+
+  ## Use existing ServiceAccount
+  ## 
+  useExistingServiceAccount: ""
+
+server:
+
+  ## If false, airbyte Server will not be created.
+  ##
+  enabled: true
+
+  ## Airbyte Server container name
+  ##
+  name: server
+
+  ## Airbyte Server replicas count
+  ##
+  replicaCount: 1
+
+  ## Airbyte Server container image
+  ##
+  image:
+    repository: airbyte/server
+    tag: 0.22.3-alpha
+    pullPolicy: IfNotPresent
+
+  ## Airbyte Server Deployment annotations
+  ##
+  deploymentAnnotations: {}
+
+  ## Additional Airbyte Server container environment variable
+  ##
+  extraEnv: {}
+
+  persistentVolume:
+
+    ## Airbyte Server Config Persistent Volume configuration.
+    ## Read More: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    ##
+    config:
+
+      ## Airbyte Server config Persistent Volume Claim annotations
+      ##
+      annotations: {}
+
+      ## airbyte Server config Persistent Volume access modes
+      ## Must match those of existing PV or dynamic provisioner
+      ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+      ##
+      accessModes:
+        - ReadWriteOnce
+
+      ## Airbyte Server config Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      # storageClass: "-" 
+
+      ## airbyte Server config Persistent Volume size
+      ##
+      size: 500Mi
+    
+    ## Airbyte Server Workspace Persistent Volume configuration.
+    ## Read More: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    ##
+    workspace:
+
+      ## airbyte Server Persistent Volume Claim annotations
+      ##
+      annotations: {}
+
+      ## airbyte DB Persistent Volume access modes
+      ## Must match those of existing PV or dynamic provisioner
+      ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+      ##
+      accessModes:
+        - ReadWriteOnce
+
+      ## alertmanager data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      # storageClass: "-" 
+
+      ## airbyte DB Persistent Volume size
+      ##
+      size: 500Mi
+
+  ## Airbyte Server Pod annotations
+  ##
+  podAnnotations: {}
+
+  ## Airbyte Server Pod labels
+  ##
+  podLabels: {}
+
+  ## Airbyte Server resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 32Mi
+
+  service:
+    ## Airbyte Server service annotations
+    ##
+    annotations: {}
+
+temporal:
+
+  ## If set to false, Temporal will not be created
+  ##
+  enabled: true
+
+  ## Temporal container name
+  ##
+  name: temporal
+
+  ## Temporal replicas count
+  ##
+  replicaCount: 1
+
+  ## Temporal container image
+  ##
+  image:
+    repository: temporalio/auto-setup
+    tag: 1.7.0
+    pullPolicy: IfNotPresent
+
+  ## Temporal Deployment annotations
+  ##
+  deploymentAnnotations: {}
+
+  ## Additional Temporal container environment variable
+  ##
+  extraEnv: {}
+
+  ## Temporal Pod annotations
+  ##
+  podAnnotations: {}
+
+  ## Temporal Pod labels
+  ##
+  podLabels: {}
+
+  ## Temporal resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 32Mi
+
+  service:
+    ## Temporal service annotations
+    ##
+    annotations: {}
+
+webapp:
+
+  ## If set to false, Airbyte webapp will not be created
+  ##
+  enabled: true
+
+  ## Airbyte webapp container name
+  ##
+  name: webapp
+
+  ## Airbyte webapp replicas count
+  ##
+  replicaCount: 1
+
+  ## Airbyte webapp container image
+  ##
+  image:
+    repository: airbyte/webapp
+    tag: 0.22.3-alpha
+    pullPolicy: IfNotPresent
+
+  ## Airbyte webapp Deployment annotations
+  ##
+  deploymentAnnotations: {}
+
+  ## Additional Airbyte webapp container environment variable
+  ##
+  extraEnv: {}
+
+  ## Airbyte webapp Pod annotations
+  ##
+  podAnnotations: {}
+
+  ## Airbyte webapp Pod labels
+  ##
+  podLabels: {}
+
+  ## Airbyte webapp resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 32Mi
+
+  service:
+    ## Airbyte webapp service annotations
+    ##
+    annotations: {}

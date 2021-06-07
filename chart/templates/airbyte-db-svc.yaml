@@ -1,0 +1,20 @@
+{{- if .Values.db.create }}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.db.service.annotations }}
+  annotations:
+{{ toYaml .Values.db.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "airbyte.db.labels" . | nindent 4 }}
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.db.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+      protocol: TCP
+  selector:
+    {{- include "airbyte.db.matchLabels" . | nindent 4 }}
+{{- end }}

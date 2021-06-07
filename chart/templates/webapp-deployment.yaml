@@ -1,0 +1,45 @@
+{{- if .Values.webapp.enabled }}
+apiVersion: {{ template "airbyte.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+{{- if .Values.webapp.deploymentAnnotations }}
+  annotations:
+    {{ toYaml .Values.webapp.deploymentAnnotations | nindent 4 }}
+{{- end }}
+  labels:
+    {{- include "airbyte.webapp.labels" . | nindent 4 }}
+    component: webapp
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.webapp.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+spec:
+  replicas: {{ .Values.webapp.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "airbyte.webapp.matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- if .Values.webapp.podAnnotations }}
+      annotations:
+        {{ toYaml .Values.webapp.podAnnotations | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "airbyte.webapp.labels" . | nindent 8 }}
+        {{- if .Values.webapp.podLabels}}
+        {{ toYaml .Values.webapp.podLabels | nindent 8 }}
+        {{- end}}
+    spec:
+      containers:
+        - name: {{ template "airbyte.fullname" . }}-{{ .Values.webapp.name }}
+          image: "{{ .Values.db.image.repository }}:{{ .Values.db.image.tag }}"
+          imagePullPolicy: "{{ .Values.db.image.pullPolicy }}"
+          ports:
+            - containerPort: 80
+          env:
+            {{- range $key, $value := .Values.webapp.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $value }}
+            {{- end }}
+            # TODO - Other Env variables
+          resources:
+            {{ toYaml .Values.webapp.resources | indent 12 }}
+{{- end }}

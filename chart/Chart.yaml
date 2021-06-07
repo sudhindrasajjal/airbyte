@@ -1,0 +1,12 @@
+apiVersion: v2
+name: airbyte
+appVersion: 0.22.3-alpha
+version: 1.0.0
+description: Airbyte is an open-source EL(T) platform that helps you replicate your data in your warehouses, lakes and databases.
+home: https://airbyte.io
+engine: gotpl
+sources:
+- https://github.com/airbytehq/airbyte
+maintainers:
+- name: sudhindrasajjal
+  email: sudhindrasajjal@gmail.com

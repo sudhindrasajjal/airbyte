@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "airbyte.fullname" . }}
+  namespace: {{ template "airbyte.namespace" . }}
+  labels:
+    {{- include "airbyte.labels" . | nindent 4 }}
+data:
+  airbyte-config: |
+    AIRBYTE_VERSION=0.22.3-alpha
+    DATABASE_DB=airbyte
+    CONFIG_ROOT=/configs
+    WORKSPACE_ROOT=/workspace
+    DATA_DOCKER_MOUNT=airbyte_data
+    DB_DOCKER_MOUNT=airbyte_db
+    WORKSPACE_DOCKER_MOUNT=airbyte_workspace
+    API_URL=
+    TRACKING_STRATEGY=segment
+    WORKER_ENVIRONMENT=kubernetes
+    LOCAL_ROOT=/tmp/airbyte_local
+    PAPERCUPS_STORYTIME=enabled
+    IS_DEMO=false

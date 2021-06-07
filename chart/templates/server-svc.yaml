@@ -1,0 +1,20 @@
+{{- if .Values.server.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.server.service.annotations }}
+  annotations:
+{{ toYaml .Values.server.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "airbyte.server.labels" . | nindent 4 }}
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.server.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+spec:
+  type: NodePort
+  ports:
+    - port: 8001
+      protocol: TCP
+  selector:
+    {{- include "airbyte.server.matchLabels" . | nindent 4 }}
+{{- end }}

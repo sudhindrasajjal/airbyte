@@ -88,6 +88,13 @@ spec:
               mountPath: /configs
             - name: airbyte-volume-workspace
               mountPath: /workspace
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+            requests:
+              cpu: 30m
+              memory: 128Mi
       initContainers:
         - name: airbyte-seed
           image: airbyte/seed

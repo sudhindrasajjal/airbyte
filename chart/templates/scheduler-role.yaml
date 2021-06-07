@@ -1,0 +1,13 @@
+{{- if and .Values.scheduler.enabled .Values.rbac.create }}
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: Role
+metadata:
+  labels:
+    {{- include "airbyte.scheduler.labels" . | nindent 4 }}
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.scheduler.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["jobs", "pods", "pods/log", "pods/exec", "pods/attach"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # over-permission for now
+{{- end }}

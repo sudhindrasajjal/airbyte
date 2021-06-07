@@ -1,0 +1,26 @@
+{{- if or .Values.server.enabled ( or .Values.scheduler.enabled .Values.temporal.enabled )}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+{{- if .Values.server.persistentVolume.workspace.annotations }}
+  annotations:
+{{ toYaml .Values.server.persistentVolume.workspace.annotations | indent 4 }}
+  {{- end }}
+  name: {{ template "airbyte.fullname" . }}-volume-workspace
+  namespace: {{ template "airbyte.namespace" . }}
+  labels:
+    {{- include "airbyte.persistentVolume.workspace.labels" . | nindent 4 }}
+spec:
+  accessModes:
+{{ toYaml .Values.server.persistentVolume.workspace.accessModes | indent 4 }}
+{{- if .Values.server.persistentVolume.workspace.storageClass }}
+{{- if (eq "-" .Values.server.persistentVolume.workspace.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.server.persistentVolume.workspace.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.server.persistentVolume.workspace.size }}
+{{- end }}

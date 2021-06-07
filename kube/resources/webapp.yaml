@@ -55,3 +55,10 @@ spec:
                   key: IS_DEMO
           ports:
             - containerPort: 80
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+            requests:
+              cpu: 30m
+              memory: 128Mi

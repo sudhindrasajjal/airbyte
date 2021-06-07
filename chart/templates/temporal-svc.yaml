@@ -1,0 +1,20 @@
+{{- if .Values.temporal.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.temporal.service.annotations }}
+  annotations:
+{{ toYaml .Values.temporal.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "airbyte.temporal.labels" . | nindent 4 }}
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.temporal.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+spec:
+  type: NodePort
+  ports:
+    - port: 7233
+      protocol: TCP
+  selector:
+    {{- include "airbyte.temporal.matchLabels" . | nindent 4 }}
+{{- end }}

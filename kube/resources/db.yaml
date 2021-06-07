@@ -39,6 +39,13 @@ spec:
           volumeMounts:
             - name: airbyte-volume-db
               mountPath: /var/lib/postgresql
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+            requests:
+              cpu: 30m
+              memory: 128Mi
       volumes:
         - name: airbyte-volume-db
           persistentVolumeClaim:

@@ -1,0 +1,20 @@
+{{- if .Values.webapp.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.webapp.service.annotations }}
+  annotations:
+{{ toYaml .Values.webapp.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "airbyte.webapp.labels" . | nindent 4 }}
+  name: {{ template "airbyte.fullname" . }}-{{ .Values.webapp.name }}
+  namespace: {{ template "airbyte.namespace" . }}
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      protocol: TCP
+  selector:
+    {{- include "airbyte.webapp.matchLabels" . | nindent 4 }}
+{{- end }}
